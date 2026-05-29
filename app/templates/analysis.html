@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>NeuroLinguist · Detailed Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #050810; --bg2: #0c1220; --bg3: #131c30; --bg4: #1a2540;
+  --text: #e8ecf4; --text2: #8392ab; --text3: #556178;
+  --accent: #4f8cff; --accent2: #6ba3ff; --accent-glow: rgba(79,140,255,0.15);
+  --teal: #2dd4a8; --teal-dim: rgba(45,212,168,0.12);
+  --red: #ff5c5c; --red-dim: rgba(255,92,92,0.12);
+  --amber: #ffb547; --amber-dim: rgba(255,181,71,0.12);
+  --purple: #a78bfa; --purple-dim: rgba(167,139,250,0.12);
+  --pink: #f472b6; --pink-dim: rgba(244,114,182,0.12);
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.1);
+  --radius: 16px; --radius-sm: 10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:1280px;margin:0 auto;padding:32px 24px}
+
+.top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;flex-wrap:wrap;gap:16px}
+.title-block h1{font-size:32px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px}
+.title-block .sub{font-size:14px;color:var(--text2)}
+.back-link{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text2);font-family:'Outfit',sans-serif;font-size:13px;text-decoration:none;transition:all .2s}
+.back-link:hover{border-color:var(--accent);color:var(--text);background:var(--accent-glow)}
+
+.banner{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.banner-left{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.banner-pred{font-size:24px;font-weight:700;letter-spacing:-0.5px}
+.banner-pred.dementia{color:var(--red)}
+.banner-pred.control{color:var(--teal)}
+.banner-meta{font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.grid-full{grid-column:1/-1}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.card-h{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.card-h .dot{width:6px;height:6px;border-radius:50%}
+.card-sub{font-size:13px;color:var(--text2);margin-bottom:20px}
+.chart-wrap{position:relative;height:340px}
+.chart-wrap.tall{height:500px}
+
+.dist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.dist-group-heading{grid-column:1/-1;display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-top:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.dist-group-heading:first-child{margin-top:0}
+.dist-group-dot{width:8px;height:8px;border-radius:50%}
+.dist-group-count{color:var(--text3);font-weight:400;letter-spacing:0.5px;margin-left:auto;font-size:10.5px}
+.dist-cell{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px}
+.dist-name{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
+.dist-meta{font-size:10.5px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
+.dist-canvas{width:100%;height:60px}
+.dist-z{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent2);margin-top:4px}
+.dist-z.high{color:var(--red)}
+.dist-z.low{color:var(--teal)}
+.dist-interp{font-size:11.5px;line-height:1.5;margin-top:8px;padding:8px 10px;border-radius:6px;color:var(--text2)}
+.dist-interp-neutral{background:rgba(131,146,171,0.08);border-left:2px solid rgba(131,146,171,0.4)}
+.dist-interp-risk{background:rgba(255,92,92,0.08);border-left:2px solid var(--red);color:var(--text)}
+.dist-interp-protective{background:rgba(45,212,168,0.08);border-left:2px solid var(--teal);color:var(--text)}
+.dist-interp strong{font-weight:600}
+
+.empty{text-align:center;padding:80px 32px;color:var(--text2)}
+.empty h2{font-size:22px;font-weight:600;margin-bottom:8px;color:var(--text)}
+.empty a{color:var(--accent);text-decoration:none}
+
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--text2)}
+.legend-item{display:inline-flex;align-items:center;gap:6px}
+.legend-swatch{width:10px;height:10px;border-radius:2px}
+
+footer{margin-top:40px;padding-top:24px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);text-align:center}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-row">
+    <div class="title-block">
+      <h1>Detailed Analysis</h1>
+      <div class="sub">How this prediction was reached, and how the sample compares to the training population.</div>
+    </div>
+    <a class="back-link" href="/">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>
+      Back to results
+    </a>
+  </div>
+
+  <div id="empty-state" class="card empty" style="display:none">
+    <h2>No prediction loaded.</h2>
+    <p>Run an analysis first, then come back to this page.</p>
+    <p style="margin-top:16px"><a href="/">Go to input page</a></p>
+  </div>
+
+  <div id="content" style="display:none">
+    <!-- Banner -->
+    <div class="banner">
+      <div class="banner-left">
+        <div class="banner-pred" id="banner-pred"></div>
+        <div class="banner-meta" id="banner-meta"></div>
+      </div>
+      <div class="banner-meta" id="banner-task"></div>
+    </div>
+
+    <!-- Per-prediction explanation: features that pushed each direction -->
+    <div class="grid">
+      <div class="card">
+        <div class="card-h"><span class="dot" style="background:var(--red)"></span>Features pushing toward Dementia</div>
+        <div class="card-sub">Largest positive deviations from population mean (z &gt; 0).</div>
+        <div class="chart-wrap"><canvas id="push-dementia"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="dot" style="background:var(--teal)"></span>Features pushing toward Control</div>
+        <div class="card-sub">Largest negative deviations from population mean (z &lt; 0).</div>
+        <div class="chart-wrap"><canvas id="push-control"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Modality contribution -->
+    <div class="grid">
+      <div class="card">
+        <div class="card-h"><span class="dot" style="background:var(--accent)"></span>Modality contribution</div>
+        <div class="card-sub">How much each of the four modalities deviated from population norms in this sample. Larger = more atypical signal in that modality.</div>
+        <div class="chart-wrap"><canvas id="modality-pie"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="dot" style="background:var(--accent)"></span>Per-model probabilities</div>
+        <div class="card-sub">Each ensemble member's independent dementia probability. Final = simple average.</div>
+        <div class="chart-wrap"><canvas id="model-bars"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Distribution comparison -->
+    <div class="card grid-full">
+      <div class="card-h"><span class="dot" style="background:var(--amber)"></span>Distribution comparison</div>
+      <div class="card-sub">For each numeric feature: a Gaussian curve representing the training-set distribution (mean &plusmn; SD); the vertical marker shows where this sample's value falls. Each cell also reports whether the value pushes the prediction toward dementia or controls, based on Pearson correlation with diagnosis across the full training set.</div>
+      <div id="dist-grid" class="dist-grid"></div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-swatch" style="background:rgba(79,140,255,0.4)"></span>Training distribution</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--amber)"></span>This sample</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:rgba(255,255,255,0.25)"></span>Population mean</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--red)"></span>\u2191 dementia signal</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--teal)"></span>\u2193 dementia signal</span>
+      </div>
+    </div>
+
+    <footer>NeuroLinguist &middot; AUB EECE 502 &middot; Spring 2026</footer>
+  </div>
+</div>
+
+<script>
+// Set Chart.js global defaults to match theme
+Chart.defaults.color = '#8392ab';
+Chart.defaults.font.family = "'Outfit', sans-serif";
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+const FRIENDLY = {
+  syntactic_complexity: 'Syntactic Complexity',
+  pronoun_noun_ratio: 'Pronoun/Noun Ratio',
+  repetition_rate: 'Repetition Rate',
+  word_frequency_index: 'Word Frequency Index',
+  content_function_ratio: 'Content/Function Ratio',
+  mean_pause_duration: 'Mean Pause Duration',
+  speech_time_ratio: 'Speech Time Ratio',
+  pitch_range: 'Pitch Range',
+  pitch_variability: 'Pitch Variability',
+  intensity_range: 'Intensity Range',
+  jitter: 'Jitter',
+  shimmer: 'Shimmer',
+  semantic_coherence: 'Semantic Coherence',
+  information_unit_coverage: 'Information Unit Coverage',
+  story_recall_similarity: 'Story Recall Similarity',
+  global_semantic_drift: 'Global Semantic Drift',
+  filler_rate: 'Filler Rate',
+  unfilled_pause_rate: 'Unfilled Pause Rate',
+  repetition_rate_bio: 'Repetition Rate (Bio)',
+  revision_rate: 'Revision Rate',
+  fragment_rate: 'Fragment Rate',
+  utterance_rate: 'Utterance Rate',
+  words_per_utterance: 'Words per Utterance',
+  word_count: 'Word Count',
+};
+function pretty(name) { return FRIENDLY[name] || name.replace(/_/g, ' '); }
+
+// Pearson correlation of each feature with the dementia label across the
+// full training set (1=Dementia, 0=Control). Positive = higher value tends
+// to occur in dementia samples; negative = higher value tends to occur in
+// controls. Used to annotate every chart with a direction arrow so the
+// reader knows whether a high bar pushes risk up or down.
+const FEATURE_CORR = {
+  information_unit_coverage: -0.604,
+  words_per_utterance: -0.380,
+  syntactic_complexity: -0.344,
+  pitch_variability: 0.317,
+  shimmer: 0.269,
+  speech_time_ratio: 0.255,
+  utterance_rate: 0.248,
+  unfilled_pause_rate: 0.231,
+  story_recall_similarity: 0.204,
+  jitter: 0.162,
+  pronoun_noun_ratio: 0.158,
+  word_count: -0.147,
+  repetition_rate: 0.140,
+  pitch_range: 0.136,
+  fragment_rate: 0.133,
+  repetition_rate_bio: 0.126,
+  filler_rate: 0.125,
+  global_semantic_drift: -0.106,
+  mean_pause_duration: -0.101,
+  revision_rate: 0.089,
+  content_function_ratio: 0.088,
+  word_frequency_index: -0.060,
+  semantic_coherence: -0.049,
+  intensity_range: -0.045,
+};
+
+// Returns "\u2191 dementia" / "\u2193 dementia" indicating which direction of
+// the feature value corresponds to higher dementia risk. The strength bucket
+// (strong/moderate/weak) reflects |Pearson r|.
+function correlationDirection(featName) {
+  const r = FEATURE_CORR[featName];
+  if (r === undefined) return null;
+  const arrow = r > 0 ? '\u2191' : '\u2193';
+  const ar = Math.abs(r);
+  let strength = 'weak';
+  if (ar >= 0.30) strength = 'strong';
+  else if (ar >= 0.15) strength = 'moderate';
+  return { arrow, sign: r > 0 ? '+' : '\u2212', r, abs: ar, strength };
+}
+
+// Compact label for chart axis tooltips: "\u2191 risk (r=+0.32)" or "\u2193 risk (r=\u22120.60)"
+function correlationLabel(featName) {
+  const c = correlationDirection(featName);
+  if (!c) return '';
+  return `${c.arrow} risk when feature is high  (r=${c.sign}${c.abs.toFixed(2)}, ${c.strength})`;
+}
+
+function modalityOf(name) {
+  if (['syntactic_complexity','pronoun_noun_ratio','repetition_rate','word_frequency_index','content_function_ratio'].includes(name)) return 'linguistic';
+  if (['mean_pause_duration','speech_time_ratio','pitch_range','pitch_variability','intensity_range','jitter','shimmer'].includes(name)) return 'acoustic';
+  if (['semantic_coherence','information_unit_coverage','story_recall_similarity','global_semantic_drift'].includes(name)) return 'semantic';
+  if (['filler_rate','unfilled_pause_rate','repetition_rate_bio','revision_rate','fragment_rate','utterance_rate','words_per_utterance','word_count'].includes(name)) return 'biomarker';
+  return 'other';
+}
+const MODALITY_COLOR = {
+  linguistic: 'rgba(167,139,250,1)',
+  acoustic: 'rgba(45,212,168,1)',
+  semantic: 'rgba(255,181,71,1)',
+  biomarker: 'rgba(244,114,182,1)',
+  other: 'rgba(131,146,171,1)',
+};
+
+let data = null;
+try {
+  const raw = sessionStorage.getItem('latestResult');
+  if (raw) data = JSON.parse(raw);
+} catch (e) {}
+
+if (!data || !data.all_features_norm) {
+  document.getElementById('empty-state').style.display = 'block';
+} else {
+  document.getElementById('content').style.display = 'block';
+  render(data);
+}
+
+function render(d) {
+  // Banner
+  const isDem = d.prediction === 'Dementia';
+  const bp = document.getElementById('banner-pred');
+  bp.textContent = d.prediction;
+  bp.className = 'banner-pred ' + (isDem ? 'dementia' : 'control');
+  document.getElementById('banner-meta').textContent =
+    d.confidence + '% confidence  \u00B7  ' + d.dementia_probability + '% dementia probability';
+  const taskNames = { cookie: 'Cookie Theft', fluency: 'Verbal Fluency', recall: 'Story Recall', sentence: 'Sentence Construction' };
+  const t = taskNames[d.task_type] || d.task_type;
+  document.getElementById('banner-task').textContent =
+    'Task: ' + t +
+    '  \u00B7  Audio: ' + (d.acoustic_measured ? 'measured' : 'not provided');
+
+  const feats = (d.all_features_norm || []).filter(f => Math.abs(f.z_score) > 0.05);
+
+  // When no audio was uploaded, acoustic values are population defaults — they
+  // carry no information about THIS sample, so suppress them from the analysis
+  // charts (modality doughnut, push-direction bars, distribution grid).
+  const acousticMeasured = d.acoustic_measured !== false;
+  const meaningfulFeats = acousticMeasured
+    ? feats
+    : feats.filter(f => modalityOf(f.name) !== 'acoustic');
+
+  // Push toward Dementia: positive z (most positive at top)
+  const pushDem = [...meaningfulFeats].filter(f => f.z_score > 0).sort((a,b) => b.z_score - a.z_score).slice(0, 8);
+  pushBarChart('push-dementia', pushDem, 'rgba(255,92,92,0.85)');
+
+  // Push toward Control: negative z (most negative — biggest absolute — at top)
+  const pushCtl = [...meaningfulFeats].filter(f => f.z_score < 0).sort((a,b) => a.z_score - b.z_score).slice(0, 8);
+  pushBarChart('push-control', pushCtl, 'rgba(45,212,168,0.85)');
+
+  // Modality contribution: sum of |z| within each modality. Drop the acoustic
+  // slice entirely if no audio was provided (otherwise it would show as 0
+  // and look like the model "considered" acoustic when it didn't).
+  const modSums = acousticMeasured
+    ? { linguistic: 0, acoustic: 0, semantic: 0, biomarker: 0 }
+    : { linguistic: 0, semantic: 0, biomarker: 0 };
+  for (const f of meaningfulFeats) {
+    const m = modalityOf(f.name);
+    if (modSums[m] !== undefined) modSums[m] += Math.abs(f.z_score);
+  }
+  modalityChart('modality-pie', modSums);
+
+  // Per-model bars
+  modelBars('model-bars', d.model_probabilities || {});
+
+  // Distribution comparison cells (acoustic-suppressed when no audio)
+  buildDistCells(meaningfulFeats);
+}
+
+function pushBarChart(canvasId, items, color) {
+  const ctx = document.getElementById(canvasId);
+  if (!items.length) {
+    ctx.parentElement.innerHTML = '<div style="text-align:center;color:var(--text3);padding:60px 0;font-size:13px">No features in this direction.</div>';
+    return;
+  }
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: items.map(f => pretty(f.name)),
+      datasets: [{
+        label: 'z-score',
+        data: items.map(f => Math.abs(f.z_score)),
+        backgroundColor: color,
+        borderRadius: 4,
+        borderSkipped: false,
+      }],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const f = items[ctx.dataIndex];
+              return `value: ${f.value}  \u00B7  z: ${f.z_score >= 0 ? '+' : ''}${f.z_score}  \u00B7  ${f.percentile}th pct`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: { beginAtZero: true, title: { display: true, text: '|z-score|', color: '#556178' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+function modalityChart(canvasId, sums) {
+  const colorMap = {
+    linguistic: 'rgba(167,139,250,0.85)',
+    acoustic:   'rgba(45,212,168,0.85)',
+    semantic:   'rgba(255,181,71,0.85)',
+    biomarker:  'rgba(244,114,182,0.85)',
+  };
+  const keys = Object.keys(sums);
+  const labels = keys.map(k => k.charAt(0).toUpperCase() + k.slice(1));
+  const values = keys.map(k => sums[k]);
+  const colors = keys.map(k => colorMap[k] || 'rgba(131,146,171,0.85)');
+  new Chart(document.getElementById(canvasId), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: '#0c1220', borderWidth: 2 }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 14, boxWidth: 10, font: { size: 12 } } },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: \u03A3|z| = ${ctx.raw.toFixed(2)}` } },
+      },
+      cutout: '60%',
+    },
+  });
+}
+
+function modelBars(canvasId, probs) {
+  const labels = Object.keys(probs).map(k => k.toUpperCase());
+  const values = Object.values(probs).map(p => +(p * 100).toFixed(1));
+  const colors = values.map(v => v >= 50 ? 'rgba(255,92,92,0.85)' : 'rgba(45,212,168,0.85)');
+  new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 6, borderSkipped: false }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.raw}% dementia probability` } },
+      },
+      scales: {
+        y: { beginAtZero: true, max: 100, title: { display: true, text: '% dementia probability', color: '#556178' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+// Human-readable per-feature interpretation. Combines the user's percentile
+// with the feature's training-set correlation to dementia label, producing a
+// sentence the reader can act on, e.g. "Higher than 87% of samples \u2014 high
+// values are associated with dementia (\u2191 risk)".
+function buildInterpretation(feat) {
+  const r = FEATURE_CORR[feat.name];
+  const pct = feat.percentile;
+  const above = pct >= 50;
+  const pctLabel = above
+    ? `Higher than ${pct.toFixed(0)}% of training samples.`
+    : `Lower than ${(100 - pct).toFixed(0)}% of training samples.`;
+
+  if (r === undefined) {
+    return { text: pctLabel, cls: 'neutral' };
+  }
+  const ar = Math.abs(r);
+  if (ar < 0.10) {
+    return {
+      text: `${pctLabel} This feature has only weak association with diagnosis (r=${r >= 0 ? '+' : ''}${r.toFixed(2)}).`,
+      cls: 'neutral',
+    };
+  }
+
+  const valueIsHigh = above;
+  const featurePushesDem = r > 0;
+  const sampleAlignsWithDem = (valueIsHigh && featurePushesDem) || (!valueIsHigh && !featurePushesDem);
+  const direction = sampleAlignsWithDem ? '\u2191 dementia signal' : '\u2193 dementia signal (control-leaning)';
+  const cls = sampleAlignsWithDem ? 'risk' : 'protective';
+  const populationStmt = featurePushesDem
+    ? 'High values associated with dementia'
+    : 'High values associated with controls';
+  return {
+    text: `${pctLabel} ${populationStmt} (r=${r >= 0 ? '+' : ''}${r.toFixed(2)}). \u2192 <strong>${direction}</strong>`,
+    cls,
+  };
+}
+
+// Per-feature distribution cell: Gaussian curve + sample marker
+function buildDistCells(feats) {
+  const grid = document.getElementById('dist-grid');
+  grid.innerHTML = '';
+
+  // Group features by modality, sort by |z-score| within each group so the
+  // most distinctive feature in each modality appears first. Display order
+  // mirrors the rest of the app: Linguistic \u2192 Acoustic \u2192 Semantic \u2192 Biomarker.
+  const GROUP_ORDER = ['linguistic', 'acoustic', 'semantic', 'biomarker'];
+  const GROUP_LABELS = {
+    linguistic: 'Linguistic',
+    acoustic: 'Acoustic',
+    semantic: 'Semantic',
+    biomarker: 'Biomarker',
+  };
+  const GROUP_COLORS = {
+    linguistic: 'var(--purple)',
+    acoustic: 'var(--teal)',
+    semantic: 'var(--amber)',
+    biomarker: 'var(--pink)',
+  };
+
+  const grouped = { linguistic: [], acoustic: [], semantic: [], biomarker: [], other: [] };
+  for (const f of feats) {
+    if (f.std === 0) continue;
+    const m = modalityOf(f.name);
+    (grouped[m] || grouped.other).push(f);
+  }
+  for (const g of Object.keys(grouped)) {
+    grouped[g].sort((a, b) => Math.abs(b.z_score) - Math.abs(a.z_score));
+  }
+
+  for (const g of GROUP_ORDER) {
+    if (!grouped[g].length) continue;
+    const heading = document.createElement('div');
+    heading.className = 'dist-group-heading';
+    heading.innerHTML = `<span class="dist-group-dot" style="background:${GROUP_COLORS[g]}"></span>${GROUP_LABELS[g]} <span class="dist-group-count">${grouped[g].length} ${grouped[g].length === 1 ? 'feature' : 'features'}</span>`;
+    grid.appendChild(heading);
+
+    for (const f of grouped[g]) {
+      const z = f.z_score;
+      const zClass = Math.abs(z) > 1.5 ? (z > 0 ? 'high' : 'low') : '';
+      const interp = buildInterpretation(f);
+      const cell = document.createElement('div');
+      cell.className = 'dist-cell';
+      cell.innerHTML = `
+        <div class="dist-name">${pretty(f.name)}</div>
+        <div class="dist-meta">value ${f.value}  \u00B7  population mean ${f.mean}  \u00B7  SD ${f.std}</div>
+        <canvas class="dist-canvas"></canvas>
+        <div class="dist-z ${zClass}">z = ${z >= 0 ? '+' : ''}${z}  \u2192  ${f.percentile}th percentile</div>
+        <div class="dist-interp dist-interp-${interp.cls}">${interp.text}</div>
+      `;
+      grid.appendChild(cell);
+      const canvas = cell.querySelector('canvas');
+      drawGaussian(canvas, f);
+    }
+  }
+}
+
+function drawGaussian(canvas, feat) {
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  // Draw distribution from -3.5 SD to +3.5 SD
+  const range = 3.5;
+  const N = 100;
+  const xs = [];
+  const ys = [];
+  for (let i = 0; i <= N; i++) {
+    const z = -range + (2 * range * i) / N;
+    xs.push(z);
+    ys.push(Math.exp(-0.5 * z * z));
+  }
+  const yMax = 1;
+
+  function xToPx(z) { return ((z + range) / (2 * range)) * W; }
+  function yToPx(y) { return H - 8 - (y / yMax) * (H - 16); }
+
+  // Filled curve
+  ctx.beginPath();
+  ctx.moveTo(xToPx(xs[0]), H - 1);
+  for (let i = 0; i < xs.length; i++) ctx.lineTo(xToPx(xs[i]), yToPx(ys[i]));
+  ctx.lineTo(xToPx(xs[xs.length - 1]), H - 1);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(79,140,255,0.45)');
+  grad.addColorStop(1, 'rgba(79,140,255,0.05)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Outline
+  ctx.beginPath();
+  for (let i = 0; i < xs.length; i++) {
+    if (i === 0) ctx.moveTo(xToPx(xs[i]), yToPx(ys[i]));
+    else ctx.lineTo(xToPx(xs[i]), yToPx(ys[i]));
+  }
+  ctx.strokeStyle = 'rgba(79,140,255,0.85)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Mean line
+  ctx.beginPath();
+  ctx.moveTo(xToPx(0), 4);
+  ctx.lineTo(xToPx(0), H - 1);
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Sample marker
+  const sampleZ = Math.max(-range, Math.min(range, feat.z_score));
+  const sampleX = xToPx(sampleZ);
+  const arrowH = 6;
+  ctx.beginPath();
+  ctx.moveTo(sampleX, 0);
+  ctx.lineTo(sampleX - arrowH, arrowH);
+  ctx.lineTo(sampleX + arrowH, arrowH);
+  ctx.closePath();
+  ctx.fillStyle = '#ffb547';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(sampleX, arrowH);
+  ctx.lineTo(sampleX, H - 1);
+  ctx.strokeStyle = '#ffb547';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+</script>
+</body>
+</html>

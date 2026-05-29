@@ -1,0 +1,204 @@
+{
+  "cookie_features": [
+    "syntactic_complexity",
+    "pronoun_noun_ratio",
+    "repetition_rate",
+    "word_frequency_index",
+    "content_function_ratio",
+    "mean_pause_duration",
+    "speech_time_ratio",
+    "pitch_range",
+    "pitch_variability",
+    "intensity_range",
+    "jitter",
+    "shimmer",
+    "semantic_coherence",
+    "information_unit_coverage",
+    "story_recall_similarity",
+    "global_semantic_drift",
+    "filler_rate",
+    "unfilled_pause_rate",
+    "repetition_rate_bio",
+    "revision_rate",
+    "fragment_rate",
+    "utterance_rate",
+    "words_per_utterance",
+    "information_unit_coverage_task_z",
+    "story_recall_similarity_task_z",
+    "syntactic_complexity_task_z",
+    "semantic_coherence_task_z",
+    "word_count"
+  ],
+  "cookie_numeric": [
+    "syntactic_complexity",
+    "pronoun_noun_ratio",
+    "repetition_rate",
+    "word_frequency_index",
+    "content_function_ratio",
+    "mean_pause_duration",
+    "speech_time_ratio",
+    "pitch_range",
+    "pitch_variability",
+    "intensity_range",
+    "jitter",
+    "shimmer",
+    "semantic_coherence",
+    "information_unit_coverage",
+    "story_recall_similarity",
+    "global_semantic_drift",
+    "filler_rate",
+    "unfilled_pause_rate",
+    "repetition_rate_bio",
+    "revision_rate",
+    "fragment_rate",
+    "utterance_rate",
+    "words_per_utterance",
+    "information_unit_coverage_task_z",
+    "story_recall_similarity_task_z",
+    "syntactic_complexity_task_z",
+    "semantic_coherence_task_z",
+    "word_count"
+  ],
+  "noncookie_features": [
+    "syntactic_complexity",
+    "pronoun_noun_ratio",
+    "repetition_rate",
+    "word_frequency_index",
+    "content_function_ratio",
+    "mean_pause_duration",
+    "speech_time_ratio",
+    "pitch_range",
+    "pitch_variability",
+    "intensity_range",
+    "jitter",
+    "shimmer",
+    "semantic_coherence",
+    "global_semantic_drift",
+    "filler_rate",
+    "unfilled_pause_rate",
+    "repetition_rate_bio",
+    "revision_rate",
+    "fragment_rate",
+    "utterance_rate",
+    "words_per_utterance",
+    "syntactic_complexity_task_z",
+    "semantic_coherence_task_z",
+    "word_count",
+    "task_cookie",
+    "task_fluency",
+    "task_recall",
+    "task_sentence"
+  ],
+  "noncookie_numeric": [
+    "syntactic_complexity",
+    "pronoun_noun_ratio",
+    "repetition_rate",
+    "word_frequency_index",
+    "content_function_ratio",
+    "mean_pause_duration",
+    "speech_time_ratio",
+    "pitch_range",
+    "pitch_variability",
+    "intensity_range",
+    "jitter",
+    "shimmer",
+    "semantic_coherence",
+    "global_semantic_drift",
+    "filler_rate",
+    "unfilled_pause_rate",
+    "repetition_rate_bio",
+    "revision_rate",
+    "fragment_rate",
+    "utterance_rate",
+    "words_per_utterance",
+    "syntactic_complexity_task_z",
+    "semantic_coherence_task_z",
+    "word_count"
+  ],
+  "task_cols": [
+    "task_cookie",
+    "task_fluency",
+    "task_recall",
+    "task_sentence"
+  ],
+  "task_stats": {
+    "information_unit_coverage": {
+      "cookie": {
+        "mean": 0.6878663573085847,
+        "std": 0.14720647769320308
+      },
+      "fluency": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "recall": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "sentence": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "story_recall_similarity": {
+      "cookie": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "fluency": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "recall": {
+        "mean": 0.25922255319148935,
+        "std": 0.09528666444368687
+      },
+      "sentence": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "syntactic_complexity": {
+      "cookie": {
+        "mean": 3.1042459396751743,
+        "std": 0.6551668169082292
+      },
+      "fluency": {
+        "mean": 1.491,
+        "std": 0.4075688804907677
+      },
+      "recall": {
+        "mean": 2.462127659574468,
+        "std": 0.7371976742935474
+      },
+      "sentence": {
+        "mean": 2.6832467532467534,
+        "std": 0.4665538085145298
+      }
+    },
+    "semantic_coherence": {
+      "cookie": {
+        "mean": 0.2554399071925754,
+        "std": 0.07092861615567304
+      },
+      "fluency": {
+        "mean": 0.2196842857142857,
+        "std": 0.11223663565636065
+      },
+      "recall": {
+        "mean": 0.25922255319148935,
+        "std": 0.09528666444368687
+      },
+      "sentence": {
+        "mean": 0.17227575757575758,
+        "std": 0.08174788028743499
+      }
+    }
+  },
+  "model_names": [
+    "xgboost",
+    "rf",
+    "svm",
+    "lr"
+  ]
+}

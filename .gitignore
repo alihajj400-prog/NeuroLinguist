@@ -1,0 +1,35 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# ---- Virtual environments ----
+venv/
+.venv/
+env/
+ENV/
+
+# ---- Data (restricted DementiaBank Pitt Corpus — see DATA.md) ----
+data/
+*.cha
+*.wav
+*.mp3
+*.csv
+!results/**/*.csv          # keep result/metric CSVs, ignore raw data CSVs
+
+# ---- Large model weights (host externally; see README) ----
+*.pt
+bert_best.pt
+
+# ---- OS / editor junk ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ---- Temp / uploads ----
+*.log
+tmp/
+uploads/
+neurolinguist_uploads/

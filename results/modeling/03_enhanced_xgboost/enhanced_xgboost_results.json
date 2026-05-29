@@ -1,0 +1,94 @@
+{
+  "original_xgboost": {
+    "n_features": 20,
+    "accuracy": 0.8706896551724138,
+    "f1_macro": 0.7350388305162174,
+    "roc_auc": 0.9208333333333333
+  },
+  "enhanced_xgboost_default": {
+    "n_features": 32,
+    "accuracy": 0.8879310344827587,
+    "f1_macro": 0.790990990990991,
+    "roc_auc": 0.9130208333333333
+  },
+  "enhanced_xgboost_tuned": {
+    "n_features": 32,
+    "accuracy": 0.8879310344827587,
+    "f1_macro": 0.7996545768566494,
+    "roc_auc": 0.9052083333333332,
+    "precision_macro": 0.8060227889310907,
+    "recall_macro": 0.79375,
+    "sensitivity": 0.9375,
+    "specificity": 0.65,
+    "confusion_matrix": [
+      [
+        13,
+        7
+      ],
+      [
+        6,
+        90
+      ]
+    ],
+    "best_params": {
+      "n_estimators": 483.0,
+      "max_depth": 7.0,
+      "learning_rate": 0.287686909121992,
+      "min_child_weight": 2.0,
+      "subsample": 0.8024712876211262,
+      "colsample_bytree": 0.9471122934008394,
+      "reg_alpha": 0.13618647212903381,
+      "reg_lambda": 0.07597971567298419,
+      "gamma": 0.09023545555843956
+    },
+    "best_cv_f1": 0.7596116390042662
+  },
+  "enhanced_features_list": [
+    "syntactic_complexity",
+    "pronoun_noun_ratio",
+    "repetition_rate",
+    "word_frequency_index",
+    "content_function_ratio",
+    "mean_pause_duration",
+    "speech_time_ratio",
+    "pitch_range",
+    "pitch_variability",
+    "intensity_range",
+    "jitter",
+    "shimmer",
+    "semantic_coherence",
+    "information_unit_coverage",
+    "story_recall_similarity",
+    "global_semantic_drift",
+    "filler_rate",
+    "unfilled_pause_rate",
+    "repetition_rate_bio",
+    "revision_rate",
+    "fragment_rate",
+    "utterance_rate",
+    "words_per_utterance",
+    "information_unit_coverage_task_z",
+    "story_recall_similarity_task_z",
+    "syntactic_complexity_task_z",
+    "semantic_coherence_task_z",
+    "word_count",
+    "task_cookie",
+    "task_fluency",
+    "task_recall",
+    "task_sentence"
+  ],
+  "new_features_added": [
+    "filler_rate",
+    "unfilled_pause_rate",
+    "repetition_rate_bio",
+    "revision_rate",
+    "fragment_rate",
+    "utterance_rate",
+    "words_per_utterance",
+    "information_unit_coverage_task_z",
+    "story_recall_similarity_task_z",
+    "syntactic_complexity_task_z",
+    "semantic_coherence_task_z",
+    "word_count"
+  ]
+}

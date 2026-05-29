@@ -1,0 +1,91 @@
+{
+  "weighted_averaging": {
+    "accuracy": 0.853448275862069,
+    "f1_macro": 0.7863720073664825,
+    "roc_auc": 0.9151041666666666,
+    "weights": {
+      "XGBoost": 0.1,
+      "RF": 0.1,
+      "SVM": 0.3,
+      "LR": 0.5
+    },
+    "threshold": 0.5800000000000003,
+    "confusion_matrix": [
+      [
+        17,
+        3
+      ],
+      [
+        14,
+        82
+      ]
+    ]
+  },
+  "routed_weighted": {
+    "accuracy": 0.9051724137931034,
+    "f1_macro": 0.8429924941552849,
+    "roc_auc": 0.8807291666666667,
+    "confusion_matrix": [
+      [
+        16,
+        4
+      ],
+      [
+        7,
+        89
+      ]
+    ]
+  },
+  "routed_weighted_t05": {
+    "accuracy": 0.9051724137931034,
+    "f1_macro": 0.8370578470182608
+  },
+  "confidence_routing": {
+    "accuracy": 0.8879310344827587,
+    "f1_macro": 0.7996545768566494,
+    "roc_auc": 0.91875,
+    "confusion_matrix": [
+      [
+        13,
+        7
+      ],
+      [
+        6,
+        90
+      ]
+    ]
+  },
+  "hybrid": {
+    "accuracy": 0.896551724137931,
+    "f1_macro": 0.81875,
+    "roc_auc": 0.91875,
+    "confusion_matrix": [
+      [
+        14,
+        6
+      ],
+      [
+        6,
+        90
+      ]
+    ]
+  },
+  "routed_weighted_best_thresh": {
+    "accuracy": 0.9137931034482759,
+    "f1_macro": 0.8489583333333333,
+    "roc_auc": 0.8807291666666667,
+    "threshold": 0.4600000000000002,
+    "sensitivity": 0.9479166666666666,
+    "specificity": 0.75,
+    "confusion_matrix": [
+      [
+        15,
+        5
+      ],
+      [
+        5,
+        91
+      ]
+    ]
+  }
+}

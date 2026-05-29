@@ -1,0 +1,20 @@
+# ============================================================
+# NEUROLINGUIST - FIRST-TIME SETUP
+# Prereq: Python 3.12 installed (https://www.python.org/downloads/release/python-31210/)
+# Copy ALL lines below and paste into PowerShell.
+# ============================================================
+
+cd $HOME\Desktop\neurolinguist-app
+py -3.12 -m venv venv
+.\venv\Scripts\activate
+pip install --no-cache-dir -r requirements.txt
+pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+python app.py
+
+# ============================================================
+# DAILY USE (after setup) - copy these 3 lines:
+# ============================================================
+
+cd $HOME\Desktop\neurolinguist-app
+.\venv\Scripts\activate
+python app.py

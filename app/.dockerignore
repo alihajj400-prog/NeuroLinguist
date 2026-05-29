@@ -1,0 +1,14 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.gitignore
+.vscode/
+.idea/
+*.md
+README*
+.env
+.DS_Store
+node_modules/
+run.ps1

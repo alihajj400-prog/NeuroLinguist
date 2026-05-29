@@ -1,0 +1,52 @@
+{
+  "model": "XGBoost (enhanced, tuned)",
+  "test_accuracy": 0.9224137931034483,
+  "test_f1": 0.8553014553014553,
+  "expected_value": 4.160216331481934,
+  "top_10_features": [
+    {
+      "feature": "information_unit_coverage",
+      "mean_abs_shap_overall": 3.1604433059692383
+    },
+    {
+      "feature": "word_count",
+      "mean_abs_shap_overall": 0.7555623650550842
+    },
+    {
+      "feature": "syntactic_complexity_task_z",
+      "mean_abs_shap_overall": 0.5911438465118408
+    },
+    {
+      "feature": "semantic_coherence_task_z",
+      "mean_abs_shap_overall": 0.5760522484779358
+    },
+    {
+      "feature": "fragment_rate",
+      "mean_abs_shap_overall": 0.5252917408943176
+    },
+    {
+      "feature": "pitch_variability",
+      "mean_abs_shap_overall": 0.47610747814178467
+    },
+    {
+      "feature": "utterance_rate",
+      "mean_abs_shap_overall": 0.4714345932006836
+    },
+    {
+      "feature": "revision_rate",
+      "mean_abs_shap_overall": 0.4541679620742798
+    },
+    {
+      "feature": "pitch_range",
+      "mean_abs_shap_overall": 0.4539628326892853
+    },
+    {
+      "feature": "intensity_range",
+      "mean_abs_shap_overall": 0.44413402676582336
+    }
+  ],
+  "n_true_positive": 93,
+  "n_true_negative": 14,
+  "n_false_positive": 6,
+  "n_false_negative": 3
+}

@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroLinguist — AI Alzheimer's Detection</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810;
+  --bg2: #0c1220;
+  --bg3: #131c30;
+  --bg4: #1a2540;
+  --text: #e8ecf4;
+  --text2: #8392ab;
+  --text3: #556178;
+  --accent: #4f8cff;
+  --accent2: #6ba3ff;
+  --accent-glow: rgba(79,140,255,0.15);
+  --teal: #2dd4a8;
+  --teal-dim: rgba(45,212,168,0.12);
+  --red: #ff5c5c;
+  --red-dim: rgba(255,92,92,0.12);
+  --amber: #ffb547;
+  --amber-dim: rgba(255,181,71,0.12);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167,139,250,0.12);
+  --pink: #f472b6;
+  --pink-dim: rgba(244,114,182,0.12);
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.1);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+::selection{background:var(--accent);color:white}
+
+/* Ambient background */
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.ambient::before{content:'';position:absolute;width:600px;height:600px;top:-200px;left:-100px;background:radial-gradient(circle,rgba(79,140,255,0.06) 0%,transparent 70%);animation:float 20s ease-in-out infinite}
+.ambient::after{content:'';position:absolute;width:500px;height:500px;bottom:-200px;right:-100px;background:radial-gradient(circle,rgba(45,212,168,0.04) 0%,transparent 70%);animation:float 25s ease-in-out infinite reverse}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
+
+.app{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:32px 24px}
+
+/* ===== INPUT PAGE ===== */
+#input-page{animation:fadeUp .5s ease}
+
+/* Header */
+.header{text-align:center;margin-bottom:48px;padding-top:20px}
+.logo-row{display:inline-flex;align-items:center;gap:14px;margin-bottom:18px}
+.logo-icon{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#4f8cff 0%,#a78bfa 50%,#2dd4a8 100%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.logo-icon::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.15) 100%)}
+.brain-svg{width:28px;height:28px;position:relative;z-index:1}
+.logo-title{font-size:32px;font-weight:700;letter-spacing:-1px}
+.logo-title span{background:linear-gradient(135deg,var(--accent2),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tagline{color:var(--text2);font-size:15px;line-height:1.7;max-width:520px;margin:0 auto 16px}
+.stats-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.stat-pill{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;letter-spacing:0.3px;font-family:'IBM Plex Mono',monospace}
+.stat-pill.acc{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(45,212,168,0.2)}
+.stat-pill.arch{background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(79,140,255,0.2)}
+.stat-pill.feat{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,0.2)}
+
+/* Input section */
+.input-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-bottom:24px}
+.section-label{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.section-label .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+
+/* Column titles — centered above each column */
+.col-title{margin-bottom:16px}
+.col-title-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:var(--radius-sm);padding:4px}
+.col-tab{flex:1;padding:10px 12px;border:none;border-radius:8px;background:transparent;color:var(--text2);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:0.3px;text-align:center}
+.col-tab.active{background:var(--bg4);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.col-tab:hover:not(.active){color:var(--text)}
+.col-title-single{background:var(--bg3);border-radius:var(--radius-sm);padding:4px;text-align:center}
+.col-title-single{padding:14px 12px;border-radius:var(--radius-sm);background:var(--bg4);color:var(--text);font-size:13px;font-weight:500;letter-spacing:0.3px;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+
+/* Tab panels — swap in place */
+.tab-panel{display:none}
+.tab-panel.active{display:flex;flex-direction:column;flex:1;animation:fadeUp .3s ease}
+
+textarea{width:100%;min-height:200px;flex:1;padding:16px;border-radius:var(--radius-sm);background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;line-height:1.7;resize:vertical;transition:border-color .2s}
+textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+textarea::placeholder{color:var(--text3)}
+
+/* CHA file drop zone */
+.cha-drop{border:2px dashed var(--border2);border-radius:var(--radius-sm);padding:40px 24px;text-align:center;cursor:pointer;transition:all .25s;position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px}
+.cha-drop:hover,.cha-drop.dragover{border-color:var(--accent);background:var(--accent-glow)}
+.cha-drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.cha-icon{font-size:28px;margin-bottom:8px;opacity:0.5}
+.cha-label{color:var(--text2);font-size:14px;line-height:1.6}
+.cha-label strong{color:var(--accent2)}
+.cha-preview{margin-top:16px;display:none}
+.cha-preview-box{background:var(--bg);border-radius:8px;padding:14px;max-height:160px;overflow-y:auto;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:var(--text2);text-align:left;border:1px solid var(--border)}
+.cha-file-name{color:var(--teal);font-family:'IBM Plex Mono',monospace;font-size:13px;margin-bottom:8px;text-align:left}
+
+/* Side-by-side input layout */
+.input-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.input-columns{grid-template-columns:1fr}}
+.input-col{display:flex;flex-direction:column}
+.input-col-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px;letter-spacing:0.5px;display:flex;align-items:center;gap:6px}
+.input-col textarea{flex:1;min-height:220px}
+.input-col .cha-drop{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px}
+.right-col-inner{display:flex;flex-direction:column;gap:14px;flex:1}
+.audio-drop-tall{flex:1;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:20px;text-align:center;cursor:pointer;transition:all .25s;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px}
+.audio-drop-tall:hover{border-color:rgba(45,212,168,0.4);background:var(--teal-dim)}
+.audio-drop-tall input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* Controls row */
+.controls-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:600px){.controls-row{grid-template-columns:1fr}}
+.form-group label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px;letter-spacing:0.5px}
+select{width:100%;padding:12px 14px;border-radius:var(--radius-sm);background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;cursor:pointer;transition:border-color .2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238392ab' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+select:focus{outline:none;border-color:var(--accent)}
+select option{background:var(--bg2)}
+
+.audio-drop{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:20px;text-align:center;cursor:pointer;transition:all .25s;position:relative}
+.audio-drop:hover{border-color:rgba(45,212,168,0.4);background:var(--teal-dim)}
+.audio-drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.audio-label{color:var(--text2);font-size:13px}
+.audio-label strong{color:var(--teal)}
+.audio-name{color:var(--teal);font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:6px}
+
+/* Analyze button */
+.task-select{margin-top:24px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 20px}
+.task-label{display:block;margin-bottom:10px}
+.task-label-title{font-size:14px;font-weight:600;color:var(--text);display:block;margin-bottom:4px}
+.task-label-title .req{color:var(--red);margin-left:2px}
+.task-label-hint{font-size:12px;color:var(--text3);display:block}
+.task-dropdown{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%238392ab' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;transition:border-color .2s}
+.task-dropdown:focus{outline:none;border-color:var(--accent)}
+.task-dropdown:invalid{color:var(--text3)}
+.task-dropdown option{background:var(--bg2);color:var(--text)}
+
+.analyze-btn{width:100%;padding:16px;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;color:white;background:linear-gradient(135deg,#4f8cff 0%,#7c6cf0 50%,#2dd4a8 100%);background-size:200% 200%;animation:gradient-shift 4s ease infinite;letter-spacing:0.3px;transition:all .25s;position:relative;overflow:hidden;margin-top:24px}
+.analyze-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(79,140,255,0.25)}
+.analyze-btn:active{transform:translateY(0)}
+.analyze-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+@keyframes gradient-shift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+.btn-content{display:flex;align-items:center;justify-content:center;gap:10px}
+.spinner{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+.loading .spinner{display:block}
+.loading .btn-label{opacity:0.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== RESULTS PAGE ===== */
+#results-page{display:none;animation:fadeUp .5s ease}
+
+.back-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text2);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;margin-bottom:24px}
+.back-btn:hover{border-color:var(--accent);color:var(--text);background:var(--accent-glow)}
+.btn-row{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+.btn-row .back-btn{margin-bottom:0}
+.analysis-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--accent);border-radius:8px;background:var(--accent-glow);color:var(--accent);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none}
+.analysis-btn:hover{background:var(--accent);color:var(--bg)}
+
+/* Verdict banner */
+.verdict{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden}
+.verdict::before{content:'';position:absolute;inset:0;opacity:0.04}
+.verdict.dementia::before{background:radial-gradient(ellipse at center,var(--red),transparent 70%)}
+.verdict.control::before{background:radial-gradient(ellipse at center,var(--teal),transparent 70%)}
+.verdict-label{font-size:13px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.verdict-value{font-size:42px;font-weight:700;letter-spacing:-1px;margin-bottom:8px}
+.verdict.dementia .verdict-value{color:var(--red)}
+.verdict.control .verdict-value{color:var(--teal)}
+.verdict-conf{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--text2)}
+
+/* Risk gauge */
+.gauge-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px;text-align:center}
+.gauge-wrap{width:240px;height:130px;margin:0 auto 8px;position:relative}
+.gauge-wrap svg{width:100%;height:100%}
+.gauge-pct{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:40px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.gauge-subtitle{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px}
+
+/* Model cards */
+.model-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:600px){.model-grid{grid-template-columns:repeat(2,1fr)}}
+.model-card{background:var(--bg3);border-radius:var(--radius-sm);padding:16px;text-align:center;border:1px solid var(--border);transition:border-color .2s}
+.model-card:hover{border-color:var(--border2)}
+.model-name{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:500}
+.model-pct{font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.model-bar{height:3px;background:var(--bg);border-radius:2px;margin-top:10px;overflow:hidden}
+.model-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+
+/* Analytics sections */
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+@media(max-width:700px){.analytics-grid{grid-template-columns:1fr}}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.card-header{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-header .dot{width:6px;height:6px;border-radius:50%}
+
+/* Feature bars */
+.feat-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.feat-row:last-child{border:none}
+.feat-name{font-size:12px;color:var(--text2);width:140px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.feat-bar-bg{position:relative;flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.feat-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.feat-bar-median{position:absolute;top:-2px;bottom:-2px;width:1px;background:rgba(255,255,255,0.25);z-index:1;pointer-events:none}
+.feat-val{font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--accent2);width:60px;text-align:right;flex-shrink:0}
+
+/* Modality breakdown */
+.modality-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.modality-item:last-child{border:none}
+.mod-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.mod-info{flex:1}
+.mod-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.mod-count{font-size:11px;color:var(--text3)}
+.mod-bar{height:4px;background:var(--bg);border-radius:2px;margin-top:6px;overflow:hidden}
+.mod-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.mod-bar-dashed{background-image:repeating-linear-gradient(90deg,currentColor 0,currentColor 4px,transparent 4px,transparent 8px) !important;background-color:transparent !important;opacity:0.6}
+
+/* Unmeasured rows */
+.row-unmeasured td{opacity:0.55}
+.val-unmeasured{font-style:italic;color:var(--text3);font-size:11px}
+
+/* Modality tags */
+.mod-tag{display:inline-block;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:500;letter-spacing:0.3px}
+.mod-tag.ling{background:var(--purple-dim);color:var(--purple)}
+.mod-tag.acou{background:var(--teal-dim);color:var(--teal)}
+.mod-tag.sem{background:var(--amber-dim);color:var(--amber)}
+.mod-tag.bio{background:var(--pink-dim);color:var(--pink)}
+.mod-tag.other{background:rgba(255,255,255,0.05);color:var(--text3)}
+
+/* Feature detail table */
+.detail-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.feat-table{width:100%;border-collapse:collapse}
+.feat-table th{text-align:left;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:10px 12px;border-bottom:1px solid var(--border);font-weight:500}
+.feat-table td{padding:10px 12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.025)}
+.feat-table td:last-child{font-family:'IBM Plex Mono',monospace;text-align:right;color:var(--accent2)}
+.feat-table tr:hover{background:rgba(255,255,255,0.015)}
+.feat-table .mod-cell{width:90px}
+
+/* Clinical note */
+.clinical-note{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.note-content{font-size:14px;line-height:1.75;color:var(--text2)}
+.note-content strong{color:var(--text);font-weight:600}
+.note-content p{margin-bottom:14px}
+.note-content p:last-child{margin-bottom:0}
+.ci-arrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:4px;margin-left:2px;letter-spacing:0.3px;white-space:nowrap}
+.ci-arrow-up{background:rgba(255,92,92,0.15);color:var(--red)}
+.ci-arrow-dn{background:rgba(45,212,168,0.15);color:var(--teal)}
+.ci-disclaimer{color:var(--text3) !important;font-size:12px !important;font-style:italic;border-top:1px solid var(--border);padding-top:14px;margin-top:18px !important}
+
+/* Footer */
+.footer{text-align:center;padding:32px 0 16px;border-top:1px solid var(--border);margin-top:32px}
+.footer p{font-size:12px;color:var(--text3);line-height:2}
+.footer a{color:var(--accent2);text-decoration:none}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeUp .5s ease both}
+.delay-1{animation-delay:.1s}
+.delay-2{animation-delay:.2s}
+.delay-3{animation-delay:.3s}
+.delay-4{animation-delay:.4s}
+.delay-5{animation-delay:.5s}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+<div class="app">
+
+<!-- ==================== INPUT PAGE ==================== -->
+<div id="input-page">
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg class="brain-svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round">
+          <path d="M12 2C9 2 7 4 7 6.5C5.5 7 4 8.5 4 10.5C4 12 5 13.5 6 14C6 16 7.5 18 10 18.5V22h4v-3.5C16.5 18 18 16 18 14c1-.5 2-2 2-3.5C20 8.5 18.5 7 17 6.5C17 4 15 2 12 2z"/>
+          <path d="M12 2v20M8 6c2 1 4 1 6 0M7 10.5c2 1.5 6 1.5 8 0M6.5 14c2 1.5 7 1.5 9 0" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="logo-title">Neuro<span>Linguist</span></div>
+    </div>
+    <p class="tagline">AI-powered Alzheimer's disease detection through multi-modal speech analysis. Combining linguistic, acoustic, and semantic biomarkers.</p>
+    <div class="stats-row">
+      <span class="stat-pill acc">92.2% accuracy</span>
+      <span class="stat-pill arch">Task-routed ensemble</span>
+      <span class="stat-pill feat">32 features &middot; 4 modalities</span>
+    </div>
+  </div>
+
+  <div class="input-section">
+    <div class="input-columns">
+      <!-- LEFT: Text input -->
+      <div class="input-col">
+        <div class="section-label" style="justify-content:center"><span class="dot"></span>Speech / Text input</div>
+        <div class="col-title">
+          <div class="col-title-tabs">
+            <button class="col-tab active" id="tab-btn-paste" onclick="switchTab('paste')">Paste transcript</button>
+            <button class="col-tab" id="tab-btn-cha" onclick="switchTab('cha')">Upload .CHA file</button>
+          </div>
+        </div>
+
+        <div id="tab-paste" class="tab-panel active">
+          <textarea id="transcript" placeholder="Paste the patient's speech transcript here. For example, their description of the Cookie Theft picture from the Boston Diagnostic Aphasia Examination..."></textarea>
+        </div>
+
+        <div id="tab-cha" class="tab-panel">
+          <div class="cha-drop" id="cha-drop">
+            <input type="file" id="cha-file" accept=".cha,.txt" onchange="handleChaFile(this)">
+            <div class="cha-icon">&#128196;</div>
+            <div class="cha-label">Drop a <strong>.CHA file</strong> here or click to browse<br><span style="font-size:12px;color:var(--text3)">CHAT format from DementiaBank / TalkBank</span></div>
+          </div>
+          <div class="cha-preview" id="cha-preview">
+            <div class="cha-file-name" id="cha-file-name"></div>
+            <div class="cha-preview-box" id="cha-parsed-text"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Audio input -->
+      <div class="input-col">
+        <div class="section-label" style="justify-content:center"><span class="dot"></span>Audio input (optional)</div>
+        <div class="col-title">
+          <div class="col-title-single">Upload audio file</div>
+        </div>
+
+        <div class="audio-drop-tall">
+          <input type="file" id="audio" accept=".wav,.mp3,.flac,.ogg" onchange="showAudioName(this)">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:8px;opacity:0.5">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/>
+          </svg>
+          <div class="audio-label">Drop <strong>.wav</strong> or <strong>.mp3</strong> audio file<br><span style="font-size:12px;color:var(--text3)">For acoustic feature extraction (pitch, pauses, jitter)</span></div>
+          <div class="audio-name" id="audio-name"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="task-select">
+    <label class="task-label">
+      <span class="task-label-title">Cognitive task <span class="req">*</span></span>
+      <span class="task-label-hint">Pick which task this transcript is from. Required — task routing is critical for accurate prediction.</span>
+    </label>
+    <select id="task-type-select" class="task-dropdown" required>
+      <option value="" disabled selected>Select a task...</option>
+      <option value="cookie">Cookie Theft (picture description)</option>
+      <option value="recall">Story Recall</option>
+      <option value="fluency">Verbal Fluency (word lists)</option>
+      <option value="sentence">Sentence Construction</option>
+    </select>
+  </div>
+
+  <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
+    <div class="btn-content">
+      <div class="spinner"></div>
+      <span class="btn-label">Analyze speech</span>
+    </div>
+  </button>
+</div>
+
+<!-- ==================== RESULTS PAGE ==================== -->
+<div id="results-page">
+  <div class="btn-row">
+    <button class="back-btn" onclick="goBack()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>
+      New analysis
+    </button>
+    <a class="analysis-btn" href="javascript:void(0)" onclick="openAnalysis()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13l3-4 3 2 5-7"/><path d="M11 4h3v3"/></svg>
+      View detailed analysis
+    </a>
+  </div>
+
+  <!-- Verdict -->
+  <div class="verdict fade-in" id="verdict">
+    <div class="verdict-label">Classification result</div>
+    <div class="verdict-value" id="verdict-value"></div>
+    <div class="verdict-conf" id="verdict-conf"></div>
+  </div>
+
+  <!-- Gauge + Models -->
+  <div class="gauge-section fade-in delay-1">
+    <div class="gauge-wrap">
+      <svg viewBox="0 0 240 130">
+        <path d="M24 120 A96 96 0 0 1 216 120" fill="none" stroke="var(--bg4)" stroke-width="14" stroke-linecap="round"/>
+        <path d="M24 120 A96 96 0 0 1 216 120" fill="none" stroke-width="14" stroke-linecap="round"
+              id="gauge-arc" stroke-dasharray="301" stroke-dashoffset="301"
+              style="transition:stroke-dashoffset 1.2s ease,stroke .5s"/>
+        <defs>
+          <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#2dd4a8"/>
+            <stop offset="50%" stop-color="#ffb547"/>
+            <stop offset="100%" stop-color="#ff5c5c"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="gauge-pct" id="gauge-pct">--</div>
+    </div>
+    <div class="gauge-subtitle">Dementia risk score</div>
+    <div class="model-grid" id="model-grid"></div>
+  </div>
+
+  <!-- Analytics -->
+  <div class="analytics-grid">
+    <!-- Top features -->
+    <div class="card fade-in delay-2">
+      <div class="card-header"><span class="dot" style="background:var(--accent)"></span>Top contributing features</div>
+      <div id="top-features"></div>
+    </div>
+
+    <!-- Modality breakdown -->
+    <div class="card fade-in delay-3">
+      <div class="card-header"><span class="dot" style="background:var(--purple)"></span>Modality breakdown</div>
+      <div id="modality-breakdown"></div>
+    </div>
+  </div>
+
+  <!-- Full feature table -->
+  <div class="detail-section fade-in delay-4">
+    <div class="card-header"><span class="dot" style="background:var(--teal)"></span>All extracted features</div>
+    <div style="overflow-x:auto">
+      <table class="feat-table">
+        <thead><tr><th>Feature</th><th class="mod-cell">Modality</th><th style="text-align:right">Value</th></tr></thead>
+        <tbody id="all-features-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Clinical interpretation -->
+  <div class="clinical-note fade-in delay-5" id="clinical-note">
+    <div class="card-header"><span class="dot" style="background:var(--amber)"></span>Clinical interpretation</div>
+    <div class="note-content" id="clinical-content"></div>
+  </div>
+
+  <div class="footer">
+    <p>NeuroLinguist &mdash; AI-Based Alzheimer's Detection via Speech Analysis<br>
+    AUB EECE 502 Final Year Project &bull; Wassim Kassem, Ali El Hajj, Tamer Lammam<br>
+    Advisor: Dr. Karim Kabalan</p>
+  </div>
+</div>
+
+</div>
+
+<script>
+/* ===== TAB SWITCHING ===== */
+function switchTab(tab) {
+  document.getElementById('tab-btn-paste').classList.toggle('active', tab === 'paste');
+  document.getElementById('tab-btn-cha').classList.toggle('active', tab === 'cha');
+  document.getElementById('tab-paste').classList.toggle('active', tab === 'paste');
+  document.getElementById('tab-cha').classList.toggle('active', tab === 'cha');
+}
+
+/* ===== CHA FILE PARSING ===== */
+function parseChaContent(text) {
+  const lines = text.split('\n');
+  const participantLines = [];
+  let currentSpeaker = null;
+  let currentLine = '';
+
+  for (const line of lines) {
+    // Main tier lines start with *
+    if (line.startsWith('*PAR:') || line.startsWith('*INV:') || line.startsWith('*CHI:')) {
+      if (currentSpeaker === 'PAR' && currentLine) {
+        participantLines.push(currentLine.trim());
+      }
+      currentSpeaker = line.startsWith('*PAR:') ? 'PAR' : (line.startsWith('*CHI:') ? 'PAR' : 'INV');
+      currentLine = line.replace(/^\*\w+:\s*/, '');
+    } else if (line.startsWith('\t') && currentSpeaker) {
+      // Continuation line
+      currentLine += ' ' + line.trim();
+    } else if (line.startsWith('%') || line.startsWith('@')) {
+      // Dependent tier or header - save current
+      if (currentSpeaker === 'PAR' && currentLine) {
+        participantLines.push(currentLine.trim());
+      }
+      currentSpeaker = null;
+      currentLine = '';
+    }
+  }
+  if (currentSpeaker === 'PAR' && currentLine) {
+    participantLines.push(currentLine.trim());
+  }
+
+  // Clean the text
+  let cleaned = participantLines.join(' ');
+  // Remove timing info like \x15...\x15 or Unicode markers
+  cleaned = cleaned.replace(/[\x15]/g, '');
+  cleaned = cleaned.replace(/\d+_\d+/g, '');
+  // Remove CHAT codes
+  cleaned = cleaned.replace(/\[.*?\]/g, '');
+  cleaned = cleaned.replace(/&[+-]\w+/g, '');
+  cleaned = cleaned.replace(/<.*?>/g, '');
+  cleaned = cleaned.replace(/\(\.\.\?\)/g, '');
+  cleaned = cleaned.replace(/\(\.+\)/g, '');
+  cleaned = cleaned.replace(/www\s*/g, '');
+  cleaned = cleaned.replace(/xxx/g, '');
+  cleaned = cleaned.replace(/\+\.\.\./g, '.');
+  cleaned = cleaned.replace(/\+\//g, '');
+  cleaned = cleaned.replace(/\+"/g, '');
+  cleaned = cleaned.replace(/\+,/g, ',');
+  // Clean up whitespace
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  // Remove trailing punctuation artifacts
+  cleaned = cleaned.replace(/\s+\./g, '.').replace(/\s+,/g, ',');
+
+  return cleaned;
+}
+
+function handleChaFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const raw = e.target.result;
+    const parsed = parseChaContent(raw);
+
+    document.getElementById('cha-file-name').textContent = file.name;
+    document.getElementById('cha-parsed-text').textContent = parsed;
+    document.getElementById('cha-preview').style.display = 'block';
+
+    // Also set the transcript textarea
+    document.getElementById('transcript').value = parsed;
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+// Drag and drop
+const chaDrop = document.getElementById('cha-drop');
+chaDrop.addEventListener('dragover', e => { e.preventDefault(); chaDrop.classList.add('dragover'); });
+chaDrop.addEventListener('dragleave', () => chaDrop.classList.remove('dragover'));
+chaDrop.addEventListener('drop', e => {
+  e.preventDefault();
+  chaDrop.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    document.getElementById('cha-file').files = e.dataTransfer.files;
+    handleChaFile(document.getElementById('cha-file'));
+  }
+});
+
+/* ===== AUDIO ===== */
+function showAudioName(input) {
+  const name = input.files[0] ? input.files[0].name : '';
+  document.getElementById('audio-name').textContent = name;
+}
+
+/* ===== TASK AUTO-DETECTION ===== */
+function detectTaskType(text) {
+  const lower = text.toLowerCase();
+  // Cookie task: mentions of cookie theft picture elements
+  const cookieKeywords = ['cookie', 'jar', 'stool', 'sink', 'overflow', 'curtain', 'dishes', 'kitchen', 'cabinet', 'falling', 'mother', 'drying', 'window', 'counter', 'plate', 'faucet', 'water running'];
+  const cookieHits = cookieKeywords.filter(k => lower.includes(k)).length;
+  if (cookieHits >= 3) return 'cookie';
+
+  // Recall task: narrative/story-like with past tense
+  const recallKeywords = ['remember', 'story', 'told', 'happened', 'once upon', 'there was', 'he said', 'she said', 'went to', 'came back'];
+  const recallHits = recallKeywords.filter(k => lower.includes(k)).length;
+  if (recallHits >= 2) return 'recall';
+
+  // Fluency task: lists of words, typically single category
+  const words = text.split(/\s+/);
+  const avgWordLen = words.reduce((a,w) => a + w.length, 0) / Math.max(words.length,1);
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim());
+  if (sentences.length <= 2 && words.length > 10 && avgWordLen < 6) return 'fluency';
+
+  // Sentence task: very short, structured sentences
+  if (words.length < 20 && sentences.length <= 3) return 'sentence';
+
+  // Default to cookie (most common task in dataset)
+  return 'cookie';
+}
+
+/* ===== ANALYSIS ===== */
+async function analyze() {
+  const btn = document.getElementById('analyzeBtn');
+  const transcript = document.getElementById('transcript').value.trim();
+  if (!transcript) { alert('Please enter a transcript or upload a CHA file.'); return; }
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  const taskType = document.getElementById('task-type-select').value;
+  if (!taskType) {
+    alert('Please select a cognitive task before analysis.');
+    document.getElementById('task-type-select').focus();
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('transcript', transcript);
+  formData.append('task_type', taskType);
+  const audioFile = document.getElementById('audio').files[0];
+  if (audioFile) formData.append('audio', audioFile);
+
+  try {
+    const res = await fetch('/predict', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.error) { alert(data.error); return; }
+    showResults(data);
+  } catch (e) {
+    alert('Error: ' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+/* ===== RESULTS DISPLAY ===== */
+function showResults(data) {
+  // Stash latest result so the /analysis page can pick it up without re-running
+  try { sessionStorage.setItem('latestResult', JSON.stringify(data)); } catch (e) {}
+  window._latestResult = data;
+  document.getElementById('input-page').style.display = 'none';
+  document.getElementById('results-page').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const isDementia = data.prediction === 'Dementia';
+  const prob = data.dementia_probability;
+
+  // Verdict
+  const verdict = document.getElementById('verdict');
+  verdict.className = 'verdict fade-in ' + (isDementia ? 'dementia' : 'control');
+  document.getElementById('verdict-value').textContent = data.prediction;
+  const taskNames = { cookie: 'Cookie Theft', fluency: 'Verbal Fluency', recall: 'Story Recall', sentence: 'Sentence Construction' };
+  const taskLabel = taskNames[data.task_type] || data.task_type;
+  document.getElementById('verdict-conf').textContent = data.confidence + '% confidence \u2022 Task: ' + taskLabel;
+
+  // Gauge
+  const offset = 301 - (301 * prob / 100);
+  const arc = document.getElementById('gauge-arc');
+  arc.style.strokeDashoffset = offset;
+  arc.setAttribute('stroke', 'url(#gaugeGrad)');
+  const gp = document.getElementById('gauge-pct');
+  gp.textContent = prob.toFixed(0) + '%';
+  gp.style.color = prob > 65 ? 'var(--red)' : prob > 35 ? 'var(--amber)' : 'var(--teal)';
+
+  // Model cards
+  const labels = { xgboost: 'XGBoost', rf: 'Random Forest', svm: 'SVM', lr: 'Logistic Reg.' };
+  const grid = document.getElementById('model-grid');
+  grid.innerHTML = '';
+  for (const [name, p] of Object.entries(data.model_probabilities)) {
+    const pct = (p * 100).toFixed(1);
+    const color = p > 0.6 ? 'var(--red)' : p > 0.4 ? 'var(--amber)' : 'var(--teal)';
+    grid.innerHTML += `<div class="model-card">
+      <div class="model-name">${labels[name] || name}</div>
+      <div class="model-pct" style="color:${color}">${pct}%</div>
+      <div class="model-bar"><div class="model-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }
+
+  // Top features: bar width = percentile in training distribution (0-100).
+  // This handles skewed features automatically — each feature is normalized
+  // against its own training distribution. The raw value is shown alongside.
+  // The 50% mark = population median; bars far above/below indicate
+  // unusual values that contributed to the prediction.
+  const topDiv = document.getElementById('top-features');
+  topDiv.innerHTML = '';
+  for (const feat of data.top_features.slice(0, 8)) {
+    const modInfo = getModality(feat.name);
+    const pct = (typeof feat.percentile === 'number') ? feat.percentile : 50;
+    const z = (typeof feat.z_score === 'number') ? feat.z_score : 0;
+    const tip = `${feat.name}\nValue: ${feat.value}\nTraining mean: ${feat.mean} (\u00B11 SD: ${feat.std})\nz-score: ${z >= 0 ? '+' : ''}${z}  \u2192  ${pct}th percentile`;
+    topDiv.innerHTML += `<div class="feat-row" title="${tip}">
+      <div class="feat-name">${formatName(feat.name)}</div>
+      <div class="feat-bar-bg">
+        <div class="feat-bar-median" style="left:50%"></div>
+        <div class="feat-bar-fill" style="width:${pct}%;background:${modInfo.color}"></div>
+      </div>
+      <div class="feat-val">${feat.value}</div>
+    </div>`;
+  }
+
+  // Modality breakdown — bar widths reflect how much each modality
+  // *deviates* from training-set norms in this sample. Using raw feature
+  // values is wrong because they have wildly different units (pitch ~150 Hz
+  // vs. repetition_rate ~0.05) and acoustic always dominated; biomarkers
+  // were always flat. Summing |z-scores| of features in `all_features_norm`
+  // gives a unit-free measure where each modality is on the same scale.
+  const modDiv = document.getElementById('modality-breakdown');
+  modDiv.innerHTML = '';
+  if (data.features_extracted) {
+    const modalities = [
+      { key: 'linguistic', name: 'Linguistic', color: 'var(--purple)' },
+      { key: 'acoustic',   name: 'Acoustic',   color: 'var(--teal)'   },
+      { key: 'semantic',   name: 'Semantic',   color: 'var(--amber)'  },
+      { key: 'biomarkers', name: 'Biomarkers', color: 'var(--pink)'   },
+    ];
+    // Map every feature to its modality (must match modalityOf in analysis.html)
+    const FEAT_TO_MOD = {
+      syntactic_complexity:'linguistic', pronoun_noun_ratio:'linguistic',
+      repetition_rate:'linguistic', word_frequency_index:'linguistic',
+      content_function_ratio:'linguistic',
+      mean_pause_duration:'acoustic', speech_time_ratio:'acoustic',
+      pitch_range:'acoustic', pitch_variability:'acoustic',
+      intensity_range:'acoustic', jitter:'acoustic', shimmer:'acoustic',
+      semantic_coherence:'semantic', information_unit_coverage:'semantic',
+      story_recall_similarity:'semantic', global_semantic_drift:'semantic',
+      filler_rate:'biomarkers', unfilled_pause_rate:'biomarkers',
+      repetition_rate_bio:'biomarkers', revision_rate:'biomarkers',
+      fragment_rate:'biomarkers', utterance_rate:'biomarkers',
+      words_per_utterance:'biomarkers', word_count:'biomarkers',
+    };
+    const sums = { linguistic: 0, acoustic: 0, semantic: 0, biomarkers: 0 };
+    for (const f of (data.all_features_norm || [])) {
+      const m = FEAT_TO_MOD[f.name];
+      if (m && typeof f.z_score === 'number') sums[m] += Math.abs(f.z_score);
+    }
+    // If no audio, suppress the acoustic bar entirely (its features have z=0
+    // because their values equal the population defaults exactly).
+    if (data.acoustic_measured === false) sums.acoustic = 0;
+
+    const maxMod = Math.max(...Object.values(sums), 0.001);
+    modalities.forEach((m) => {
+      const feats = data.features_extracted[m.key] || {};
+      const count = Object.keys(feats).length;
+      const pct = (sums[m.key] / maxMod * 100).toFixed(0);
+      const isAcousticUnmeasured = (m.key === 'acoustic' && data.acoustic_measured === false);
+      const labelText = isAcousticUnmeasured
+        ? 'Not measured (no audio uploaded)'
+        : `${count} features extracted  \u00B7  \u03A3|z| = ${sums[m.key].toFixed(2)}`;
+      const barClass = isAcousticUnmeasured ? 'mod-bar-fill mod-bar-dashed' : 'mod-bar-fill';
+      const dimStyle = isAcousticUnmeasured ? 'opacity:0.45;' : '';
+      modDiv.innerHTML += `<div class="modality-item" style="${dimStyle}">
+        <div class="mod-dot" style="background:${m.color}"></div>
+        <div class="mod-info">
+          <div class="mod-name">${m.name}</div>
+          <div class="mod-count">${labelText}</div>
+          <div class="mod-bar"><div class="${barClass}" style="width:${pct}%;background:${m.color}"></div></div>
+        </div>
+      </div>`;
+    });
+  }
+
+  // All features table — mark acoustic rows as defaults when no audio uploaded
+  // and push them to the bottom of the table so the meaningful (measured)
+  // features show first.
+  const tbody = document.getElementById('all-features-tbody');
+  tbody.innerHTML = '';
+  if (data.features_extracted) {
+    const acousticUnmeasured = data.acoustic_measured === false;
+    const ordered = Object.entries(data.features_extracted);
+    if (acousticUnmeasured) {
+      ordered.sort(([a], [b]) => {
+        if (a === 'acoustic' && b !== 'acoustic') return 1;
+        if (b === 'acoustic' && a !== 'acoustic') return -1;
+        return 0;
+      });
+    }
+    for (const [category, feats] of ordered) {
+      const isUnmeasured = (category === 'acoustic' && acousticUnmeasured);
+      for (const [k, v] of Object.entries(feats)) {
+        const val = typeof v === 'number' ? v.toFixed(4) : v;
+        const modInfo = getModality(k);
+        const valDisplay = isUnmeasured
+          ? `<span class="val-unmeasured" title="Population default \u2014 no audio uploaded">${val} \u2022 default</span>`
+          : val;
+        tbody.innerHTML += `<tr${isUnmeasured ? ' class="row-unmeasured"' : ''}>
+          <td>${formatName(k)}</td>
+          <td class="mod-cell"><span class="mod-tag ${modInfo.cls}">${modInfo.label}</span></td>
+          <td>${valDisplay}</td>
+        </tr>`;
+      }
+    }
+  }
+
+  // Clinical interpretation
+  generateClinicalNote(data);
+}
+
+function generateClinicalNote(data) {
+  const isDementia = data.prediction === 'Dementia';
+  const prob = data.dementia_probability;
+  const feats = data.features_extracted || {};
+  const ling = feats.linguistic || {};
+  const acou = feats.acoustic || {};
+  const sem = feats.semantic || {};
+  const bio = feats.biomarkers || {};
+
+  /* Per-feature Pearson correlations with diagnosis, training-set derived.
+     Used to interpret whether the user's value pushes toward dementia (r>0
+     means high values are dementia-associated) or toward controls (r<0). */
+  const FEATURE_CORR = {
+    information_unit_coverage: -0.604, words_per_utterance: -0.380,
+    syntactic_complexity: -0.344, pitch_variability: 0.317, shimmer: 0.269,
+    speech_time_ratio: 0.255, utterance_rate: 0.248, unfilled_pause_rate: 0.231,
+    story_recall_similarity: 0.204, jitter: 0.162, pronoun_noun_ratio: 0.158,
+    word_count: -0.147, repetition_rate: 0.140, pitch_range: 0.136,
+    fragment_rate: 0.133, repetition_rate_bio: 0.126, filler_rate: 0.125,
+    global_semantic_drift: -0.106, mean_pause_duration: -0.101,
+    revision_rate: 0.089, content_function_ratio: 0.088,
+    word_frequency_index: -0.060, semantic_coherence: -0.049,
+    intensity_range: -0.045,
+  };
+  /* Population means from the training set (cookie scaler stats). Used to
+     decide whether the user's value sits above or below the typical sample. */
+  const FEATURE_MEAN = {
+    syntactic_complexity: 3.10, pronoun_noun_ratio: 0.73, repetition_rate: 0.05,
+    word_frequency_index: 0.44, content_function_ratio: 0.64,
+    information_unit_coverage: 0.40, semantic_coherence: 0.45,
+    global_semantic_drift: 0.18, story_recall_similarity: 0.18,
+    filler_rate: 0.04, fragment_rate: 0.04, revision_rate: 0.02,
+    repetition_rate_bio: 0.04, unfilled_pause_rate: 0.05,
+    utterance_rate: 0.18, words_per_utterance: 6.5, word_count: 130,
+    pitch_range: 234, pitch_variability: 30, intensity_range: 35,
+    mean_pause_duration: 0.45, speech_time_ratio: 0.65,
+    jitter: 0.027, shimmer: 0.13,
+  };
+  function dirArrow(name, value) {
+    const r = FEATURE_CORR[name]; const mean = FEATURE_MEAN[name];
+    if (r === undefined || mean === undefined || Math.abs(r) < 0.10) return '';
+    const above = value >= mean;
+    const aligns = (above && r > 0) || (!above && r < 0);
+    return aligns
+      ? '<span class="ci-arrow ci-arrow-up">\u2191 dementia</span>'
+      : '<span class="ci-arrow ci-arrow-dn">\u2193 dementia</span>';
+  }
+
+  let note = '';
+
+  /* ---- Lead summary ---- */
+  if (isDementia) {
+    note += `<p><strong>The model predicts cognitive impairment</strong> with a ${prob.toFixed(1)}% dementia probability for this sample, evaluated against the ${data.task_type} task pipeline. The verdict reflects the simple-average vote of four base classifiers (XGBoost, Random Forest, SVM, Logistic Regression) all trained on the same 32-dimensional multi-modal feature vector. Several individual features stand out as atypical relative to the training population &mdash; the breakdown below explains which ones, and in what direction.</p>`;
+  } else {
+    note += `<p><strong>The model predicts normal cognitive function</strong> with a ${(100-prob).toFixed(1)}% control probability for this sample, evaluated against the ${data.task_type} task pipeline. The four base classifiers in the ensemble (XGBoost, Random Forest, SVM, Logistic Regression) collectively favoured the control class. The breakdown below shows which feature values are consistent with healthy speech and which, if any, deviate.</p>`;
+  }
+
+  /* ---- Linguistic ---- */
+  if (Object.keys(ling).length) {
+    let lp = '<p><strong>Linguistic structure.</strong> ';
+    const sc = ling.syntactic_complexity;
+    if (sc !== undefined) {
+      let scBucket;
+      if (sc < 2.5) scBucket = `<strong>low (${sc.toFixed(2)})</strong>, well below the population mean of 3.10. Shallower parse trees and shorter clauses are a documented marker of declining grammatical control in early dementia`;
+      else if (sc > 3.7) scBucket = `<strong>elevated (${sc.toFixed(2)})</strong>, above the typical training value of 3.10. Preserved sentence depth suggests intact grammatical processing`;
+      else scBucket = `<strong>within normal range (${sc.toFixed(2)})</strong>, near the population mean of 3.10`;
+      lp += `Syntactic complexity is ${scBucket} ${dirArrow('syntactic_complexity', sc)}. `;
+    }
+    if (ling.pronoun_noun_ratio !== undefined) {
+      const pn = ling.pronoun_noun_ratio;
+      if (pn > 1.0) lp += `Pronoun-to-noun ratio is high (${pn.toFixed(2)}), indicating reliance on vague references like "it" or "that one" rather than specific nouns &mdash; a known correlate of word-finding difficulty ${dirArrow('pronoun_noun_ratio', pn)}. `;
+      else if (pn < 0.5) lp += `Pronoun-to-noun ratio is low (${pn.toFixed(2)}), reflecting specific noun use ${dirArrow('pronoun_noun_ratio', pn)}. `;
+    }
+    if (ling.content_function_ratio !== undefined) {
+      const cfr = ling.content_function_ratio;
+      lp += `The ratio of content words (nouns, verbs, adjectives) to function words (articles, prepositions) is ${cfr.toFixed(2)} ${dirArrow('content_function_ratio', cfr)}.`;
+    }
+    note += lp + '</p>';
+  }
+
+  /* ---- Semantic ---- */
+  if (Object.keys(sem).length) {
+    let sp = '<p><strong>Semantic content.</strong> ';
+    if (sem.information_unit_coverage !== undefined && data.task_type === 'cookie') {
+      const iu = sem.information_unit_coverage;
+      let iuBucket;
+      if (iu < 0.35) iuBucket = `<strong>notably low (${(iu*100).toFixed(0)}%)</strong>, indicating difficulty identifying key picture elements such as the boy, cookie jar, sink, or overflowing water. Reduced information-unit coverage is the single most discriminating feature in this corpus (Pearson r = &minus;0.60 with diagnosis)`;
+      else if (iu > 0.55) iuBucket = `<strong>strong (${(iu*100).toFixed(0)}%)</strong>, demonstrating that the speaker engaged with most of the visual scene. This is the most protective feature in the model &mdash; controls typically score higher here than dementia samples`;
+      else iuBucket = `<strong>moderate (${(iu*100).toFixed(0)}%)</strong>, capturing roughly half the canonical Cookie Theft information units`;
+      sp += `Information unit coverage is ${iuBucket} ${dirArrow('information_unit_coverage', iu)}. `;
+    }
+    if (sem.semantic_coherence !== undefined) {
+      const co = sem.semantic_coherence;
+      if (co < 0.3) sp += `Sentence-to-sentence semantic coherence is low (${co.toFixed(2)}), suggesting the narrative jumps between topics ${dirArrow('semantic_coherence', co)}. `;
+      else sp += `Semantic coherence is ${co.toFixed(2)} ${dirArrow('semantic_coherence', co)}. `;
+    }
+    if (sem.global_semantic_drift !== undefined) {
+      const dr = sem.global_semantic_drift;
+      sp += `Global semantic drift &mdash; the spread of sentence embeddings around the discourse centroid &mdash; is ${dr.toFixed(2)} ${dirArrow('global_semantic_drift', dr)}.`;
+    }
+    note += sp + '</p>';
+  }
+
+  /* ---- Biomarkers ---- */
+  if (Object.keys(bio).length) {
+    let bp = '<p><strong>Disfluency biomarkers.</strong> ';
+    const items = [];
+    if (bio.fragment_rate > 0.05) items.push(`elevated fragment rate (${(bio.fragment_rate*100).toFixed(1)}%) which often reflects abandoned word attempts and word-finding difficulty ${dirArrow('fragment_rate', bio.fragment_rate)}`);
+    if (bio.filler_rate > 0.06) items.push(`frequent fillers (${(bio.filler_rate*100).toFixed(1)}% &mdash; "um", "uh", "er") signalling hesitancy in speech production ${dirArrow('filler_rate', bio.filler_rate)}`);
+    if (bio.revision_rate > 0.03) items.push(`above-average revision rate (${(bio.revision_rate*100).toFixed(1)}%), indicating self-correction attempts mid-utterance ${dirArrow('revision_rate', bio.revision_rate)}`);
+    if (bio.repetition_rate_bio > 0.05) items.push(`repeated words and phrases (${(bio.repetition_rate_bio*100).toFixed(1)}%) ${dirArrow('repetition_rate_bio', bio.repetition_rate_bio)}`);
+    if (bio.unfilled_pause_rate > 0.03) items.push(`a notable unfilled-pause rate (${(bio.unfilled_pause_rate*100).toFixed(1)}%) ${dirArrow('unfilled_pause_rate', bio.unfilled_pause_rate)}`);
+    if (bio.words_per_utterance !== undefined) {
+      const wpu = bio.words_per_utterance;
+      items.push(`mean words-per-utterance of ${wpu.toFixed(1)} ${dirArrow('words_per_utterance', wpu)}`);
+    }
+    if (items.length === 0) {
+      bp += `Disfluency rates (fillers, fragments, revisions, repetitions) are within or below typical range, consistent with fluent speech production.`;
+    } else {
+      bp += `The transcript shows ${items.join('; ')}.`;
+    }
+    note += bp + '</p>';
+  }
+
+  /* ---- Acoustic (only if measured) ---- */
+  if (Object.keys(acou).length && data.acoustic_measured !== false) {
+    let ap = '<p><strong>Acoustic profile.</strong> ';
+    if (acou.pitch_variability !== undefined) {
+      const pv = acou.pitch_variability;
+      ap += `Pitch variability is ${pv.toFixed(1)} Hz ${dirArrow('pitch_variability', pv)} &mdash; this is one of the strongest acoustic markers in the model. Reduced prosodic variation is associated with cognitive decline. `;
+    }
+    if (acou.mean_pause_duration !== undefined) {
+      ap += `Mean pause duration is ${acou.mean_pause_duration.toFixed(2)} s ${dirArrow('mean_pause_duration', acou.mean_pause_duration)}. `;
+    }
+    if (acou.jitter !== undefined && acou.shimmer !== undefined) {
+      ap += `Voice quality measures &mdash; jitter ${acou.jitter.toFixed(4)} ${dirArrow('jitter', acou.jitter)}, shimmer ${acou.shimmer.toFixed(3)} ${dirArrow('shimmer', acou.shimmer)} &mdash; reflect period-to-period instability and amplitude perturbation in the voice signal.`;
+    }
+    note += ap + '</p>';
+  } else if (Object.keys(acou).length) {
+    note += `<p><strong>Acoustic profile.</strong> No audio file was uploaded, so the seven acoustic features (pitch range, pitch variability, intensity range, jitter, shimmer, mean pause duration, speech-time ratio) used population-mean defaults during inference. Upload a .wav or .mp3 sample to add the acoustic modality to the analysis.</p>`;
+  }
+
+  /* ---- Disclaimer ---- */
+  note += '<p class="ci-disclaimer">This is an AI screening tool for research purposes only. It is not a clinical diagnosis. Please consult a qualified healthcare professional for medical assessment.</p>';
+
+  document.getElementById('clinical-content').innerHTML = note;
+}
+
+/* ===== HELPERS ===== */
+function getModality(feature) {
+  const ling = ['syntactic_complexity','pronoun_noun_ratio','repetition_rate','word_frequency_index','content_function_ratio'];
+  const acou = ['mean_pause_duration','speech_time_ratio','pitch_range','pitch_variability','intensity_range','jitter','shimmer'];
+  const sem = ['semantic_coherence','information_unit_coverage','story_recall_similarity','global_semantic_drift'];
+  const bio = ['filler_rate','unfilled_pause_rate','repetition_rate_bio','revision_rate','fragment_rate','utterance_rate','words_per_utterance','word_count'];
+
+  if (ling.includes(feature)) return { label: 'Linguistic', cls: 'ling', color: 'var(--purple)' };
+  if (acou.includes(feature)) return { label: 'Acoustic', cls: 'acou', color: 'var(--teal)' };
+  if (sem.includes(feature)) return { label: 'Semantic', cls: 'sem', color: 'var(--amber)' };
+  if (bio.includes(feature)) return { label: 'Biomarker', cls: 'bio', color: 'var(--pink)' };
+  return { label: 'Other', cls: 'other', color: 'var(--text3)' };
+}
+
+function formatName(name) {
+  return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function goBack() {
+  document.getElementById('results-page').style.display = 'none';
+  document.getElementById('input-page').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openAnalysis() {
+  window.location.href = '/analysis';
+}
+</script>
+</body>
+</html>

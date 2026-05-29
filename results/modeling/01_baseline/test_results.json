@@ -1,0 +1,97 @@
+{
+  "Logistic Regression (class_wt)": {
+    "accuracy": 0.8103448275862069,
+    "precision_macro": 0.7173611111111111,
+    "recall_macro": 0.8260416666666667,
+    "f1_macro": 0.7410714285714286,
+    "roc_auc": 0.86875,
+    "specificity": 0.85,
+    "sensitivity": 0.8020833333333334,
+    "confusion_matrix": [
+      [
+        17,
+        3
+      ],
+      [
+        19,
+        77
+      ]
+    ]
+  },
+  "SVM (class_wt)": {
+    "accuracy": 0.8103448275862069,
+    "precision_macro": 0.7173611111111111,
+    "recall_macro": 0.8260416666666667,
+    "f1_macro": 0.7410714285714286,
+    "roc_auc": 0.9221354166666668,
+    "specificity": 0.85,
+    "sensitivity": 0.8020833333333334,
+    "confusion_matrix": [
+      [
+        17,
+        3
+      ],
+      [
+        19,
+        77
+      ]
+    ]
+  },
+  "Random Forest (class_wt)": {
+    "accuracy": 0.8793103448275862,
+    "precision_macro": 0.786525974025974,
+    "recall_macro": 0.8677083333333333,
+    "f1_macro": 0.8161231884057971,
+    "roc_auc": 0.9015624999999999,
+    "specificity": 0.85,
+    "sensitivity": 0.8854166666666666,
+    "confusion_matrix": [
+      [
+        17,
+        3
+      ],
+      [
+        11,
+        85
+      ]
+    ]
+  },
+  "XGBoost (scale_pos_wt)": {
+    "accuracy": 0.8879310344827587,
+    "precision_macro": 0.7979608822305452,
+    "recall_macro": 0.8729166666666667,
+    "f1_macro": 0.8265669925244394,
+    "roc_auc": 0.9192708333333333,
+    "specificity": 0.85,
+    "sensitivity": 0.8958333333333334,
+    "confusion_matrix": [
+      [
+        17,
+        3
+      ],
+      [
+        10,
+        86
+      ]
+    ]
+  },
+  "Random Forest (SMOTE)": {
+    "accuracy": 0.8793103448275862,
+    "precision_macro": 0.786525974025974,
+    "recall_macro": 0.8677083333333333,
+    "f1_macro": 0.8161231884057971,
+    "roc_auc": 0.8718750000000001,
+    "specificity": 0.85,
+    "sensitivity": 0.8854166666666666,
+    "confusion_matrix": [
+      [
+        17,
+        3
+      ],
+      [
+        11,
+        85
+      ]
+    ]
+  }
+}

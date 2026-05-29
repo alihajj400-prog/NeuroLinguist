@@ -1,0 +1,46 @@
+{
+  "acoustic_only": {
+    "accuracy": 0.8189655172413793,
+    "f1_macro": 0.7002583979328165,
+    "roc_auc": 0.8541666666666666
+  },
+  "bert_finetuned": {
+    "accuracy": 0.8448275862068966,
+    "f1_macro": 0.7769230769230769,
+    "roc_auc": 0.9052083333333333,
+    "precision_macro": 0.7477678571428572,
+    "recall_macro": 0.846875,
+    "confusion_matrix": [
+      [
+        17,
+        3
+      ],
+      [
+        15,
+        81
+      ]
+    ]
+  },
+  "bert_cls_xgboost": {
+    "accuracy": 0.8620689655172413,
+    "f1_macro": 0.783076203833567,
+    "roc_auc": 0.9041666666666667
+  },
+  "multimodal_fusion": {
+    "accuracy": 0.8620689655172413,
+    "f1_macro": 0.783076203833567,
+    "roc_auc": 0.90625,
+    "precision_macro": 0.7606837606837606,
+    "recall_macro": 0.8177083333333333,
+    "confusion_matrix": [
+      [
+        15,
+        5
+      ],
+      [
+        11,
+        85
+      ]
+    ]
+  }
+}
